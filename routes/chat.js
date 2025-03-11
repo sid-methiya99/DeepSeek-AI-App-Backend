@@ -108,74 +108,27 @@ chatRouter.post("/send", authMiddleware, async (req, res) => {
 });
 
 // 3. /chat/history/:chatSessionId (GET): Get Chat History for a Session
-// chatRouter.get('/history/:chatSessionId', verifyToken, async (req, res) => {
-//   try {
-//     const userId = req.user.userId;
-//     const chatSessionId = req.params.chatSessionId;
-//
-//     // Validate chatSessionId
-//     if (!mongoose.Types.ObjectId.isValid(chatSessionId)) {
-//       return res.status(400).json({ error: "Invalid chatSessionId" });
-//     }
-//
-//     const chatHistory = await ChatMessage.find({ chatSession: chatSessionId, user: userId })
-//       .sort({ timestamp: 1 });
-//
-//     res.json(chatHistory);
-//   } catch (error) {
-//     console.error("❌ Error fetching chat history:", error.message);
-//     res.status(500).json({ error: "Error fetching chat history", details: error.message });
-//   }
-// });
-//
-// // 4. /chat/sessions (GET): Get List of Chat Sessions
-// chatRouter.get('/sessions', verifyToken, async (req, res) => {
-//   try {
-//     const userId = req.user.userId;
-//     const chatSessions = await ChatSession.find({ user: userId })
-//       .sort({ startTime: -1 });
-//
-//     res.json(chatSessions);
-//   } catch (error) {
-//     console.error("❌ Error fetching chat sessions:", error.message);
-//     res.status(500).json({ error: "Error fetching chat sessions", details: error.message });
-//   }
-// });
-//
-// // 5. /chat/rename/:chatSessionId (PUT): Rename a Chat Session
-// chatRouter.put('/rename/:chatSessionId', verifyToken, async (req, res) => {
-//   const { title } = req.body;
-//   const chatSessionId = req.params.chatSessionId;
-//
-//   if (!title) {
-//     return res.status(400).json({ error: "Missing title" });
-//   }
-//
-//   try {
-//     const userId = req.user.userId;
-//
-//     // Validate chatSessionId
-//     if (!mongoose.Types.ObjectId.isValid(chatSessionId)) {
-//       return res.status(400).json({ error: "Invalid chatSessionId" });
-//     }
-//
-//     const chatSession = await ChatSession.findOneAndUpdate(
-//       { _id: chatSessionId, user: userId },
-//       { title: title },
-//       { new: true, runValidators: true } // Return the updated document and run validators
-//     );
-//
-//     if (!chatSession) {
-//       return res.status(404).json({ error: "Chat session not found" });
-//     }
-//
-//     res.json(chatSession);
-//   } catch (error) {
-//     console.error("❌ Error renaming chat session:", error.message);
-//     res.status(500).json({ error: "Error renaming chat session", details: error.message });
-//   }
-// });
-//
+chatRouter.get('/history/:chatSessionId', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.userId;
+        const chatSessionId = req.params.chatSessionId;
+
+        console.log(userId);
+        console.log(chatSessionId);
+        // Validate chatSessionId
+        if (!mongoose.Types.ObjectId.isValid(chatSessionId)) {
+            return res.status(400).json({ error: "Invalid chatSessionId" });
+        }
+
+        const chatHistory = await chatMessage.find({ chatSession: chatSessionId, sender: userId })
+
+        console.log(chatHistory);
+        res.json(chatHistory);
+    } catch (error) {
+        console.error("❌ Error fetching chat history:", error.message);
+        res.status(500).json({ error: "Error fetching chat history", details: error.message });
+    }
+});
 module.exports = {
     chatRouter
 };

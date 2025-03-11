@@ -29,13 +29,13 @@ Create an Android chatbot that allows users to sign up/sign in, chat with Google
     *   The `ChatSession` model will store information about each chat session (e.g., start time, name).
 *   [x] **Implement Signup/Signin:** Create API endpoints for user registration (`/signup`) and login (`/signin`). Use `bcrypt` to hash passwords before storing them in the database. Upon successful login, generate a JWT and send it back to the Android app.
 *   [ ] **Create Chat Endpoints:**
-    *   [ ] `/chat/start`: Creates a new chat session.
-    *   [ ] `/chat/send`: Receives a message from the Android app, sends it to the Gemini API, stores both the user's message and Gemini's response in the database, and returns Gemini's response to the Android app.
-    *   [ ] `/chat/history`: Returns the chat history for a specific chat session.
+    *   [x] `/chat/start`: Creates a new chat session.
+    *   [x] `/chat/send`: Receives a message from the Android app, sends it to the Gemini API, stores both the user's message and Gemini's response in the database, and returns Gemini's response to the Android app.
+    *   [x] `/chat/history`: Returns the chat history for a specific chat session.
     *   [ ] `/chat/sessions`: Returns a list of chat sessions for a user.
     *   [ ] `/chat/rename`: Allows the user to rename a chat session.
-*   [ ] **Protect Endpoints with JWT:** Use middleware to protect the `/chat` endpoints, requiring a valid JWT to access them.
-*   [ ] **Handle Gemini API:** Make the Gemini API calls from your backend, not from the Android app. This is crucial for security.
+*   [x] **Protect Endpoints with JWT:** Use middleware to protect the `/chat` endpoints, requiring a valid JWT to access them.
+*   [x] **Handle Gemini API:** Make the Gemini API calls from your backend, not from the Android app. This is crucial for security.
 
 **Simplified Data Flow:**
 
@@ -60,7 +60,7 @@ Create an Android chatbot that allows users to sign up/sign in, chat with Google
 
 **Simplified Tasks:**
 
-*   [] **Set up Android Studio:** Install Android Studio and create a new project.
+*   [x] **Set up Android Studio:** Install Android Studio and create a new project.
 *   [] **Design UI:** Create the UI for the signup/signin screens, the chat screen, and the chat history screen.
 *   [] **Implement Signup/Signin:** Implement the logic to send signup/signin requests to your backend using Retrofit. Store the JWT securely in the Android Keystore after successful login.
 *   [ ] **Implement Chat Interface:**
