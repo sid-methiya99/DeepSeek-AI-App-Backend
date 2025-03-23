@@ -21,6 +21,43 @@ chatRouter.post('/start', authMiddleware, async (req, res) => {
     }
 });
 
+// 4. /chat/sessions (GET): Get List of Chat Sessions
+chatRouter.get('/sessions', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const chatSessions = await chatSession.find({ user: userId })
+      .sort({ startTime: -1 });
+
+    res.json(chatSessions);
+  } catch (error) {
+    console.error("❌ Error fetching chat sessions:", error.message);
+    res.status(500).json({ error: "Error fetching chat sessions", details: error.message });
+  }
+});
+
+// 3. /chat/history/:chatSessionId (GET): Get Chat History for a Session
+
+chatRouter.get('/history/:chatSessionId', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.userId;
+        const chatSessionId = req.params.chatSessionId;
+
+        console.log(userId);
+        console.log(chatSessionId);
+        // Validate chatSessionId
+        if (!mongoose.Types.ObjectId.isValid(chatSessionId)) {
+            return res.status(400).json({ error: "Invalid chatSessionId" });
+        }
+
+        const chatHistory = await chatMessage.find({ chatSession: chatSessionId});
+
+        console.log(chatHistory);
+        res.json(chatHistory);
+    } catch (error) {
+        console.error("❌ Error fetching chat history:", error.message);
+        res.status(500).json({ error: "Error fetching chat history", details: error.message });
+    }
+});
 // 2. /chat/send (POST): Send a Message and Get Gemini's Response
 
 chatRouter.post("/send", authMiddleware, async (req, res) => {
@@ -70,7 +107,7 @@ chatRouter.post("/send", authMiddleware, async (req, res) => {
             console.error("❌ Gemini API Error:", geminiError.response?.data || geminiError.message);
 
             // Store the error in the database
-            const newGeminiMessage = new ChatMessage({
+            const newGeminiMessage = new chatMessage({
                 chatSession: chatSessionId,
                 sender: userObjectId, // Use the User _id
                 timestamp: new Date(),
@@ -106,27 +143,46 @@ chatRouter.post("/send", authMiddleware, async (req, res) => {
         res.status(500).json({ error: "Failed to process request", details: error.message });
     }
 });
-
-// 3. /chat/history/:chatSessionId (GET): Get Chat History for a Session
-chatRouter.get('/history/:chatSessionId', authMiddleware, async (req, res) => {
+// 4. /chat/close (POST): Close a Chat Session
+chatRouter.post('/close', authMiddleware, async (req, res) => {
     try {
+        const { chatSessionId } = req.body;
         const userId = req.userId;
-        const chatSessionId = req.params.chatSessionId;
 
-        console.log(userId);
-        console.log(chatSessionId);
         // Validate chatSessionId
         if (!mongoose.Types.ObjectId.isValid(chatSessionId)) {
             return res.status(400).json({ error: "Invalid chatSessionId" });
         }
 
-        const chatHistory = await chatMessage.find({ chatSession: chatSessionId, sender: userId })
+        // Find the chat session
+        const session = await chatSession.findOne({ 
+            _id: chatSessionId, 
+            user: userId 
+        });
 
-        console.log(chatHistory);
-        res.json(chatHistory);
+        if (!session) {
+            return res.status(404).json({ error: "Chat session not found or not owned by user" });
+        }
+
+        // Update the session to mark it as closed
+        session.endTime = new Date();
+        
+        // Optionally, you could also generate a summary of the conversation
+        // This could be a simple count of messages or a more complex AI-generated summary
+        const messageCount = await chatMessage.countDocuments({ chatSession: chatSessionId });
+        session.summary = `Conversation ended with ${messageCount} messages`;
+
+        await session.save();
+
+        res.json({ 
+            message: "Chat session closed successfully", 
+            chatSessionId: session._id,
+            endTime: session.endTime,
+            summary: session.summary 
+        });
     } catch (error) {
-        console.error("❌ Error fetching chat history:", error.message);
-        res.status(500).json({ error: "Error fetching chat history", details: error.message });
+        console.error("❌ Error closing chat session:", error.message);
+        res.status(500).json({ error: "Error closing chat session", details: error.message });
     }
 });
 module.exports = {

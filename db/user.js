@@ -53,7 +53,11 @@ const chatMessageSchema = new mongoose.Schema({
     isUserMessage: {
         type: Boolean,
         default: true, // Indicates if the message was sent by the user or the bot
-    }
+    },
+    content: {
+        type: String,
+        required: true,
+    },
 });
 
 const chatSessionSchema = new mongoose.Schema({
