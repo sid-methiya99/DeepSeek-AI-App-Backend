@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 mongoose.connect(
-    "mongodb+srv://siddharth:siddu789@cluster0.mugrk.mongodb.net/deepseekBackend",
+    "yourmongodburlhere",
 );
 const userSchema = new mongoose.Schema({
     username: {
